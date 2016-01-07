@@ -12,9 +12,10 @@ namespace BayWatchCSVExtractor
         {
             CSVParser parser = new CSVParser();
             parser.CSVFileToCache();
+
             foreach (var item in parser.Cache)
             {
-                DatabaseWriter.writeToBeachedTable(item.BeachedClass);
+                DatabaseWriter.writeRowToDatabase(item);
             }
 
         }
