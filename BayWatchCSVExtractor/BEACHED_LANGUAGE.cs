@@ -14,7 +14,6 @@ namespace BayWatchCSVExtractor
     
     public partial class BEACHED_LANGUAGE
     {
-        public int BL_ID { get; set; }
         public long BEACHED_ID { get; set; }
         public int LANG_ID { get; set; }
         public byte FLUENCY { get; set; }

@@ -28,9 +28,10 @@ namespace BayWatchCSVExtractor
 
         public List<CSVRow> Cache { get; private set; }
 
-        public void CSVFileToCache()
+        public void CSVFileToCache(string Dir)
         {
-            using (TextFieldParser parser = new TextFieldParser(@"C:\Users\kevin.tran\Desktop\CSV\Sheet_1.csv"))
+            //using (TextFieldParser parser = new TextFieldParser(@"C:\Users\kevin.tran\Desktop\CSV\Sheet_1.csv"))
+            using (TextFieldParser parser = new TextFieldParser(@Dir))
             {
                 parser.TextFieldType = FieldType.Delimited;
                 parser.SetDelimiters(",");
@@ -67,15 +68,14 @@ namespace BayWatchCSVExtractor
             foreach (var additionLanguage in additionLanguages)
             {
                 var beachedLanguage = new BEACHED_LANGUAGE();
-                beachedLanguage.BEACHED = beached;
-                beachedLanguage.ADDITIONAL_LANGUAGE = additionLanguage;
+               // beachedLanguage.ADDITIONAL_LANGUAGE = additionLanguage;
+                beachedLanguage.LANG_ID = additionLanguage.LANG_ID;
+                beachedLanguage.BEACHED_ID = beached.BEACHED_ID;
                
                 listOfBeachedLangauge.Add(beachedLanguage);
             }
 
             return listOfBeachedLangauge;
-
-
 
         }
 

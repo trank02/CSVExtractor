@@ -26,47 +26,61 @@ namespace BayWatchCSVExtractor
     public class DatabaseWriter
     {
 
-        public static bool writeRowToDatabase(CSVRow Row) {
+        public static bool writeRowToDatabase(CSVRow Row)
+        {
+
+            try
+            {
+                writeToAdditionalLanguageTable(Row.AdditionalLanuageClass);
+                writeToBeachedTable(Row.BeachedClass);
+                writeToBeachedLanguageTable(Row, Row.AdditionalLanuageClass);
+
+
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.StackTrace);
+                return false;
+            }
+
+            return true;
+
+        }
+
+        private static void writeToBeachedLanguageTable(CSVRow row, HashSet<ADDITIONAL_LANGUAGE> hashSetAttidionalLanguage)
+        {
+            foreach (var item in hashSetAttidionalLanguage)
+            {
+                using (var context = new LPPEntities())
+                {
+                    context.Database.Log = Console.Write;
+
+                    var beached = context.BEACHEDs.FirstOrDefault(s => s.BEACHED_ID.Equals(row.BeachedClass.BEACHED_ID));
+                    var language = context.ADDITIONAL_LANGUAGE.FirstOrDefault(s => s.LANG_NAME.Equals(item.LANG_NAME));
+
+                    beached.BEACHED_LANGUAGE.Add(new BEACHED_LANGUAGE
+                    {
+
+                        FLUENCY = 2,
+                        BEACHED = beached,
+                        ADDITIONAL_LANGUAGE = language
+                    });
+
+
+
+                    context.SaveChanges();
+                }
+            }
+        }
+
+
+        private static void writeToAdditionalLanguageTable(HashSet<ADDITIONAL_LANGUAGE> Languages)
+        {
 
 
             using (var context = new LPPEntities())
             {
                 context.Database.Log = Console.Write;
-
-                try
-                {
-                    writeToAdditionalLanguageTable(Row.AdditionalLanuageClass, context);
-                    writeToBeachedTable(Row.BeachedClass, context);
-                    writeToBeachedLanguageTable(context, Row.BeachedLanguageClass);
-
-                    context.SaveChanges();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.StackTrace);
-                    return false;
-                }
-                
-                return true;
-            }
-        }
-
-        private static void writeToBeachedLanguageTable(LPPEntities context, HashSet<BEACHED_LANGUAGE> hashSetBeachedLanguage)
-        {
-            //foreach (var item in hashSetBeachedLanguage)
-            //{
-                context.BEACHED_LANGUAGE.AddRange(hashSetBeachedLanguage);
-           // }
-        }
-
-
-        private static void writeToAdditionalLanguageTable(HashSet<ADDITIONAL_LANGUAGE> Languages, LPPEntities context)
-        {
-            
-
-            //using (var context = new LPPEntities())
-            //{
-               // context.Database.Log = Console.Write;
 
                 foreach (var language in Languages)
                 {
@@ -75,48 +89,54 @@ namespace BayWatchCSVExtractor
                         context.ADDITIONAL_LANGUAGE.Add(language);
                     }
                 }
-               // context.SaveChanges();
-           // }
+                context.SaveChanges();
+            }
 
         }
 
-        private static void writeToBeachedTable(BEACHED consultant, LPPEntities context)
+        private static void writeToBeachedTable(BEACHED consultant)
         {
 
-            //using (var context = new LPPEntities())
-            //{
-               // context.Database.Log = Console.Write;
+            using (var context = new LPPEntities())
+            {
+                context.Database.Log = Console.Write;
 
                 var Existingbeached = context.BEACHEDs.FirstOrDefault(c => c.BEACHED_ID.Equals(consultant.BEACHED_ID));
                 if (Existingbeached != null)
                 {
                     context.BEACHEDs.Attach(Existingbeached);
 
-                    Existingbeached = consultant;
+                    Existingbeached.ACADEMY = consultant.ACADEMY;
+                    Existingbeached.AVAILABLE = consultant.AVAILABLE;
+                    Existingbeached.PREV_PLACEMENT = consultant.PREV_PLACEMENT;
+                    Existingbeached.PREV_JOB_TITLE = consultant.PREV_JOB_TITLE;
+                    Existingbeached.FULL_NAME = consultant.FULL_NAME;
+                    Existingbeached.STREAM = consultant.STREAM;
 
-                  //  context.SaveChanges();
+                    context.SaveChanges();
                 }
                 else
                 {
                     context.BEACHEDs.Add(consultant);
-                    //try
-                    //{
-                    //    context.SaveChanges();
-                    //}
-                    //catch (DbEntityValidationException e)
-                    //{
-                    //    foreach (var item in e.EntityValidationErrors)
-                    //    {
-                    //        Console.WriteLine(item.ValidationErrors.ToString());
-                    //    }
+                    try
+                    {
+                        context.SaveChanges();
+                    }
+                    catch (DbEntityValidationException e)
+                    {
+                        foreach (var item in e.EntityValidationErrors)
+                        {
+                            Console.WriteLine(item.ValidationErrors.ToString());
+                        }
 
-                    //}
-                    //catch (Exception e)
-                    //{
-                    //    Console.WriteLine((e.InnerException.InnerException));
-                    //}
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine((e.InnerException.InnerException));
+                    }
                 }
             }
         }
     }
+}
 
